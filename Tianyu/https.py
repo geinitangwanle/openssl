@@ -7,7 +7,8 @@ PORT = 4433  # 选用 4433 作为 HTTPS 服务器端口
 PORT = 4433：443 是 HTTPS 的标准端口，但非 root 用户无法监听 1024 以下端口，所以这里用 4433。
 """
 
-context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) #ssl.PROTOCOL_TLS_SERVER 默认支持 TLS 1.2（Python 3.6+）。
+context.minimum_version = ssl.TLSVersion.TLSv1_2  # 禁用 TLS 1.0 和 1.1
 context.load_cert_chain(certfile="/Users/tangren/Documents/GitHub/openssl/Tianyu/server.crt", keyfile="/Users/tangren/Documents/GitHub/openssl/Tianyu/server.key")
 """
 ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)：创建一个 TLS 服务器端 SSL 上下文（context）。
@@ -26,12 +27,11 @@ def handle_request(client_socket):
     print(f"Received request:\n{request}") #打印收到的请求内容（通常是 GET / HTTP/1.1）。
 
     response = """\
-    HTTP/1.1 200 OK
-    Content-Type: text/html
+HTTP/1.1 200 OK
+Content-Type: text/html
 
-    <html><body><h1>HTTPS Server Running</h1></body></html>
-    """
-
+<html><body><h1>HTTPS Server Running</h1></body></html>
+"""
     """
     HTTP/1.1 200 OK：表示 HTTP 响应成功（状态码 200）。
     Content-Type: text/html：告诉浏览器返回的是 HTML 网页。
@@ -46,7 +46,7 @@ with context.wrap_socket(server_socket, server_side=True) as secure_sock: #封�
     print(f"HTTPS Server listening on {HOST}:{PORT}...")
 
     while True:
-        client_socket, addr = secure_sock.accept() #等待客户端连接。
+        client_socket, addr = secure_sock.accept() #等待客户端连接。secure_sock.accept()：当客户端连接时，服务器会 自动进行 TLS 握手。
         print(f"TLS connection from {addr}") #打印客户端 IP。
         handle_request(client_socket) #调用 handle_request() 处理 HTTP 请求。
 
