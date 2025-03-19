@@ -1,6 +1,7 @@
 import socket
 import ssl
 import json
+import time
 # 服务器信息
 SERVER_HOST = "127.0.0.1" # 仅在本机监听 
 SERVER_PORT = 4433 # 选用 4433 作为 HTTPS 服务器端口
@@ -47,8 +48,10 @@ def send_http_request(method, path, body=None):
         response = tls_socket.recv(4096).decode("utf-8")
         print(f"Received Response:\n{response}")
 
-# 发送 GET 请求
-send_http_request("GET", "/time")
+while True:
+    # 发送 GET 请求
+    send_http_request("GET", "/time")
+    time.sleep(5)
+    # 发送 POST 请求
+    send_http_request("POST", "/echo", json.dumps({"message": "Hello, TLS Server"}))
 
-# 发送 POST 请求
-send_http_request("POST", "/echo", json.dumps({"message": "Hello, TLS Server"}))
